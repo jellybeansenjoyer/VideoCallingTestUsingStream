@@ -13,9 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import android.Manifest
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
-import java.security.Permissions
 
 @Composable
 fun VideoCallScreen(state: VideoCallState,onAction: (VideoCallAction)->Unit) {
@@ -47,14 +48,19 @@ fun VideoCallScreen(state: VideoCallState,onAction: (VideoCallAction)->Unit) {
             val basePermissions = listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
             val bluetoothPermissions = if(Build.VERSION.SDK_INT >= 31) { listOf(Manifest.permission.BLUETOOTH_CONNECT) } else { emptyList<String>() }
             val notifivationPermissions = if(Build.VERSION.SDK_INT >= 33) { listOf(Manifest.permission.POST_NOTIFICATIONS) } else { emptyList<String>() }
+            val context= LocalContext.current
             CallContent(
                 call = state.call,
                 modifier = Modifier.fillMaxSize(),
                 permissions = rememberCallPermissionsState(
                     call = state.call,
                     permissions = basePermissions + bluetoothPermissions + notifivationPermissions,
-                    onAllPermissionsGranted = {
-                        onAction(VideoCallAction.JoinCall)
+                    onPermissionsResult = {permissions->
+                        if(permissions.values.contains(false)){
+                            Toast.makeText(context,"Not all permissions granted",Toast.LENGTH_SHORT).show()
+                        }else{
+                            onAction(VideoCallAction.JoinCall)
+                        }
                     }
                 ),
             )

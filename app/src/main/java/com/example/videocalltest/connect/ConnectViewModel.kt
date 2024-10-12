@@ -22,14 +22,16 @@ class ConnectViewModel (
             is ConnectAction.OnNameChange -> {
                 state = state.copy(name=action.name)
             }
+
+
         }
     }
     fun connectToRoom(){
-        state.copy(error = null)
+        state = state.copy(error = null)
         if(state.name.isBlank()){
-            state.copy(error = "Username cannot be null")
+            state = state.copy(error = "Username cannot be null")
         }
         (app as VideoCalling).initVideo(state.name)
-        state.copy(isConnected = true)
+        state = state.copy(isConnected = true)
     }
 }
